@@ -1,0 +1,1 @@
+# Indicares_TradingView
