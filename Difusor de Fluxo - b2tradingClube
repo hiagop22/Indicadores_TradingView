@@ -1,0 +1,82 @@
+//@version=2
+//@author Hiago (hiagop22)
+study(title="Flow diffuser (b2tradingclub)", shorttitle="Flow Diffuser (b2tradingclub)")
+
+//--------------------------------------------------------//
+// Flow difuser based on Algorithm from Andre Moraes and Autor Danilo Recchia
+// Core algorithm: https://github.com/b2tradingclub/profitchart-estrategias/blob/master/PhiCube/PhiCube_SANTO/Difusor_Fluxo_LongShort_Santo.src
+
+// periodos macd
+period1 = 17
+period2 = 58
+source = close
+
+// raramente alterado
+avgPeriod = 17
+longPeriod = 72
+
+plotCenterLine = 1
+plotLongLine = 1
+
+
+signal = ema(source, period1) - ema(source, period2)
+avg = ema(signal, avgPeriod)
+long = ema(signal, longPeriod)
+
+hl = highest(signal, avgPeriod) //High Line (Border)
+ll = lowest(signal, avgPeriod) //Low Line (Border)
+dist = hl-ll //range of the channel
+hf = hl-dist*0.214 //Highest Fibonacci line
+cf = hl-dist*0.500
+lf = hl-dist*0.786 //Lowest Fibonacci line 
+
+phl = highest(high, avgPeriod) //High Line (Border)
+pll = lowest(low, avgPeriod) //Low Line (Border)
+pdist = phl-pll //range of the channel
+phf = phl-pdist*0.214 //Highest Fibonacci line
+pcf = phl-pdist*0.500
+plf = phl-pdist*0.786 //Lowest Fibonacci line 
+
+smoothAvg = ema(avg, 17)
+smoothLong = ema(long, 72)
+smoothCenter = (smoothAvg + smoothLong) / 2
+
+newSignal = ema(signal, 3)
+
+// sempre branco ate que se prove o contrario 
+//plotColor = black
+
+plotWidth = 2
+PaintBar = white
+
+//if (signal > signal[1]) and (signal[1] > smoothCenter)
+//    plotColor = green
+//    plotWidth = 5
+//    PaintBar = green
+
+//else 
+//    if ((signal < signal[1]) and (signal[1] < smoothCenter))
+//        plotColor = red
+//        plotWidth = 5
+//        PaintBar = red
+
+dif_IsAbove = ((newSignal > smoothAvg) and (newSignal > smoothCenter) and (newSignal > smoothLong))
+dif_IsBelow = ((newSignal < smoothAvg) and (newSignal < smoothCenter) and (newSignal < smoothLong))
+
+plotColor = dif_IsAbove ? green : dif_IsBelow ? red : black
+
+
+// signal
+plot(newSignal, color=plotColor, linewidth=plotWidth)
+
+// santo banda
+plot(smoothAvg)
+
+// santo
+//if (plotLongLine == 1)
+plot(smoothLong)
+
+// centro banda
+//if (plotCenterLine == 1)
+plot(smoothCenter)
+//barcolor(plotColor, title="Bar Colors")
